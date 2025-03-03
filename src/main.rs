@@ -96,25 +96,35 @@ async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
     let if_none_match = request.headers().get(header::IF_NONE_MATCH);
     let if_modified_since = request.headers().get(header::IF_MODIFIED_SINCE);
 
-    // Determine response type based on cache headers
-    let (status, body, message) = match if_none_match {
-        Some(if_none_match) if etag == if_none_match => (
+    let etag_matches = if_none_match.map(|h| h == etag).unwrap_or(false);
+    let last_modified_matches = if_modified_since
+        .map(|h| h == last_modified)
+        .unwrap_or(false);
+
+    let (status, body, message) = if etag_matches && last_modified_matches {
+        (
+            StatusCode::NOT_MODIFIED,
+            Body::empty(),
+            "Returning 304 Not Modified (ETag and Last-Modified match)",
+        )
+    } else if etag_matches {
+        (
             StatusCode::NOT_MODIFIED,
             Body::empty(),
             "Returning 304 Not Modified (ETag match)",
-        ),
-        _ => match if_modified_since {
-            Some(if_modified_since) if last_modified == if_modified_since => (
-                StatusCode::NOT_MODIFIED,
-                Body::empty(),
-                "Returning 304 Not Modified (Last-Modified match)",
-            ),
-            _ => (
-                StatusCode::OK,
-                Body::from(FEED_CONTENT.to_string()),
-                "Returning 200 OK with full content",
-            ),
-        },
+        )
+    } else if last_modified_matches {
+        (
+            StatusCode::NOT_MODIFIED,
+            Body::empty(),
+            "Returning 304 Not Modified (Last-Modified match)",
+        )
+    } else {
+        (
+            StatusCode::OK,
+            Body::from(FEED_CONTENT.to_string()),
+            "Returning 200 OK with full content",
+        )
     };
 
     // Build the response with all headers
