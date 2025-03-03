@@ -20,6 +20,13 @@ cargo run
 2. Add http://127.0.0.1:3000 to your feed reader, refresh the feed once or twice
 3. Inspect the logs
 
+Example output (initial subscription and a refresh):
+
+```
+2025-03-03T22:52:39.055642Z  INFO feed_reader_testbed: Server running on http://127.0.0.1:3000
+2025-03-03T22:52:59.879651Z  INFO feed_reader_testbed: Returning 304 Not Modified (ETag and Last-Modified match) request_id=ff7a9b616bdea509 user_agent=Vienna/8414 (Macintosh; Intel macOS 15_3_0) if_none_match=Some("\"be363b466230b823db7c8f2f6626dc90\"") if_modified_since=Some("Sun, 03 Mar 2024 00:00:00 GMT")
+```
+
 Full usage:
 
 ```
