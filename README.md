@@ -9,6 +9,8 @@ See [Rachel Kroll's post on this subject](https://rachelbythebay.com/w/2023/01/1
 
 This tool is inspired by [Rachel's feed reader score service](https://rachelbythebay.com/w/2024/05/30/fs/).
 
+See [my blog post introducing the problem and the tool](https://stasiak.at/20250303-testing-feed-readers-with-feed-reader-testbed.html).
+
 Quick start:
 
 1. Run it
