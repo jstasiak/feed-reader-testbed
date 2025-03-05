@@ -91,7 +91,7 @@ async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
             .collect::<String>()
     ))
     .unwrap();
-    let last_modified = HeaderValue::from_static("Sun, 03 Mar 2024 00:00:00 GMT");
+    let last_modified = HeaderValue::from_static("Sun, 03 Mar 2024 05:00:00 GMT");
 
     let if_none_match = request.headers().get(header::IF_NONE_MATCH);
     let if_modified_since = request.headers().get(header::IF_MODIFIED_SINCE);
