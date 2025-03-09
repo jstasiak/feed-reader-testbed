@@ -7,7 +7,6 @@ use axum::{
 };
 use clap::Parser;
 use getrandom;
-use md5;
 use std::net::SocketAddr;
 use tracing::{Level, info};
 
@@ -82,15 +81,7 @@ async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
     </entry>
 </feed>"#;
 
-    let etag = HeaderValue::from_str(&format!(
-        "\"{}\"",
-        md5::compute(FEED_CONTENT)
-            .0
-            .iter()
-            .map(|b| format!("{:02x}", b))
-            .collect::<String>()
-    ))
-    .unwrap();
+    let etag = HeaderValue::from_str("gei0eef3eeth1Oox9aile7ienguhaizo").unwrap();
     let last_modified = HeaderValue::from_static("Sun, 03 Mar 2024 05:00:00 GMT");
 
     let if_none_match = request.headers().get(header::IF_NONE_MATCH);
