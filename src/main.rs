@@ -8,7 +8,7 @@ use axum::{
 use clap::Parser;
 use getrandom;
 use std::net::SocketAddr;
-use tracing::{Level, info};
+use tracing::{Level, info, span, warn};
 
 const X_REQUEST_ID: header::HeaderName = header::HeaderName::from_static("x-request-id");
 const CACHE_CONTROL_VALUE: &str = "public, max-age=3600";
@@ -55,6 +55,7 @@ async fn serve_index() -> Response<Body> {
 
 async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
     let request_id = generate_request_id();
+    let _span = span!(Level::INFO, "serve_feed", request_id).entered();
 
     // Get user agent for logging
     let user_agent = request
@@ -62,6 +63,7 @@ async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
         .get(header::USER_AGENT)
         .and_then(|h| h.to_str().ok())
         .unwrap_or("Not provided");
+    info!("User agent: {}", user_agent);
 
     const FEED_CONTENT: &str = r#"<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
@@ -80,17 +82,48 @@ async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
         <summary>This is a sample entry in our Atom feed.</summary>
     </entry>
 </feed>"#;
-
     let etag = HeaderValue::from_str("gei0eef3eeth1Oox9aile7ienguhaizo").unwrap();
     let last_modified = HeaderValue::from_static("Sun, 03 Mar 2024 05:00:00 GMT");
 
     let if_none_match = request.headers().get(header::IF_NONE_MATCH);
     let if_modified_since = request.headers().get(header::IF_MODIFIED_SINCE);
 
-    let etag_matches = if_none_match.map(|h| h == etag).unwrap_or(false);
-    let last_modified_matches = if_modified_since
-        .map(|h| h == last_modified)
-        .unwrap_or(false);
+    let etag_matches = match if_none_match {
+        Some(h) => {
+            if h != etag {
+                warn!(
+                    "If-None-Match header mismatch: given {:?}, expected {:?}",
+                    h, etag
+                );
+                false
+            } else {
+                info!("If-None-Match header matched");
+                true
+            }
+        }
+        None => {
+            info!("If-None-Match header not provided");
+            false
+        }
+    };
+    let last_modified_matches = match if_modified_since {
+        Some(h) => {
+            if h != last_modified {
+                warn!(
+                    "If-Modified-Since header mismatch: given {:?}, expected {:?}",
+                    h, last_modified
+                );
+                false
+            } else {
+                info!("If-Modified-Since header matched");
+                true
+            }
+        }
+        None => {
+            info!("If-Modified-Since header not present");
+            false
+        }
+    };
 
     let (status, body, message) = if etag_matches && last_modified_matches {
         (
@@ -118,6 +151,8 @@ async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
         )
     };
 
+    info!("{}", message);
+
     // Build the response with all headers
     let mut builder = Response::builder()
         .status(status)
@@ -132,14 +167,6 @@ async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
     }
 
     let response = builder.body(body).unwrap();
-
-    info!(
-        request_id = %request_id,
-        user_agent = %user_agent,
-        if_none_match = ?if_none_match.map(|h| h.to_str().unwrap_or("invalid")),
-        if_modified_since = ?if_modified_since.map(|h| h.to_str().unwrap_or("invalid")),
-        "{}", message
-    );
 
     response
 }

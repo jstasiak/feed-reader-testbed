@@ -25,8 +25,14 @@ cargo run
 Example output (initial subscription and a refresh):
 
 ```
-2025-03-03T23:35:29.185126Z  INFO feed_reader_testbed: Returning 200 OK with full content request_id=53b035e40bf7f91e user_agent=Vienna/8414 (Macintosh; Intel macOS 15_3_0) if_none_match=None if_modified_since=None
-2025-03-03T23:35:54.032359Z  INFO feed_reader_testbed: Returning 304 Not Modified (ETag and Last-Modified match) request_id=8eeb56fb8ea3c62a user_agent=Vienna/8414 (Macintosh; Intel macOS 15_3_0) if_none_match=Some("\"be363b466230b823db7c8f2f6626dc90\"") if_modified_since=Some("Sun, 03 Mar 2024 00:00:00 GMT")
+2025-03-11T17:43:41.531321Z  INFO serve_feed{request_id="4d4ce16e0fe4f029"}: feed_reader_testbed: User agent: feedparser/6.0.11 +https://github.com/kurtmckee/feedparser/
+2025-03-11T17:43:41.531349Z  INFO serve_feed{request_id="4d4ce16e0fe4f029"}: feed_reader_testbed: If-None-Match header not provided
+2025-03-11T17:43:41.531358Z  INFO serve_feed{request_id="4d4ce16e0fe4f029"}: feed_reader_testbed: If-Modified-Since header not present
+2025-03-11T17:43:41.531369Z  INFO serve_feed{request_id="4d4ce16e0fe4f029"}: feed_reader_testbed: Returning 200 OK with full content
+2025-03-11T17:43:51.553979Z  INFO serve_feed{request_id="2b1c60904032d9c7"}: feed_reader_testbed: User agent: feedparser/6.0.11 +https://github.com/kurtmckee/feedparser/
+2025-03-11T17:43:51.554065Z  INFO serve_feed{request_id="2b1c60904032d9c7"}: feed_reader_testbed: If-None-Match header matched
+2025-03-11T17:43:51.554084Z  INFO serve_feed{request_id="2b1c60904032d9c7"}: feed_reader_testbed: If-Modified-Since header matched
+2025-03-11T17:43:51.554102Z  INFO serve_feed{request_id="2b1c60904032d9c7"}: feed_reader_testbed: Returning 304 Not Modified (ETag and Last-Modified match)
 ```
 
 Full usage:
