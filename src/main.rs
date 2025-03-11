@@ -57,6 +57,13 @@ async fn serve_feed(request: axum::extract::Request) -> Response<Body> {
     let request_id = generate_request_id();
     let _span = span!(Level::INFO, "serve_feed", request_id).entered();
 
+    if let Some(referer) = request.headers().get(header::REFERER) {
+        warn!("Got unexpected referer: {:?}", referer);
+    }
+    if let Some(cookies) = request.headers().get(header::COOKIE) {
+        warn!("Got unexpected cookies: {:?}", cookies);
+    }
+
     // Get user agent for logging
     let user_agent = request
         .headers()
